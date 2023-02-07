@@ -1,0 +1,32 @@
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  background-image: url("/images/table.jpg");
+  background-size: contain;
+}
+
+.tile {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: clamp (5rem, 2vw, 2rem);
+  border: 1px solid #fec456;
+  aspect-ratio: 1;
+}
+
+.tile img {
+  width: 80%;
+  height: 80%;
+}
+
+.tile.hableToMove::before {
+  content: "";
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  background-color: rgba(81, 255, 0, 0.575);
+}
