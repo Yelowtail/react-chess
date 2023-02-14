@@ -3,9 +3,6 @@ import ITile from "../../interfaces/ITile";
 import Piece from "../Piece";
 
 export default class Rook extends Piece {
-  public image: string;
-  public alreadyMoved: boolean = false;
-
   public get position(): string {
     return this._position;
   }
@@ -18,7 +15,6 @@ export default class Rook extends Piece {
   constructor(color: "white" | "black") {
     let img = `/images/rook_${color}.png`;
     super(img, color);
-    this.image = img;
   }
   /**
    *

@@ -3,9 +3,6 @@ import ITile from "../../interfaces/ITile";
 import Piece from "../Piece";
 
 export default class Bishop extends Piece {
-  public image: string;
-  public alreadyMoved: boolean = false;
-
   public get position(): string {
     return this._position;
   }
@@ -17,17 +14,16 @@ export default class Bishop extends Piece {
   constructor(color: "white" | "black") {
     let img = `/images/bishop_${color}.png`;
     super(img, color);
-    this.image = img;
   }
   /**
    *
    * @param position {string} id de la casilla donde se encuentra (Ejemplo: b5)
    * @returns {string[]} Casillas atacadas por la pieza desde la posicion actual (Ejemplo: ['c4', 'c6'])
    */
-  public attackingTiles(): string[] {
+ public attackingTiles(): string[] {
     let row = this.letters.findIndex((letter) => letter === this.position[0]);
     let col = Number(this.position[1]);
-    let tiles = [];
+    let tiles:string[] = [];
     for (let i = 0; i < 8; i++) {
       row + i < 8 && col + i <= 8 && tiles.push(`${this.letters[row + i]}${col + i}`);
       row + i < 8 && col - i <= 8 && col - i >= 0 && tiles.push(`${this.letters[row + i]}${col - i}`);
