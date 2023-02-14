@@ -4,7 +4,7 @@ interface ITile {
   id: string;
   piece?: Piece;
   attackedBy?: string[];
-  hableToMove?: boolean;
+  ableToMove?: boolean;
 }
 
 export default ITile;

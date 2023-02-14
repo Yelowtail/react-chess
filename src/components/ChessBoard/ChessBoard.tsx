@@ -13,36 +13,69 @@ import Queen from "../../models/pieces/Queen";
 import King from "../../models/pieces/King";
 
 import "./ChessBoard.css";
+import environment from "../../environment/environment";
 
 const ChessBoard = () => {
   const {
     initialState: chessState,
     setInitialState: setChessState,
     getTile,
+    pieces,
   } = useInitialChessState();
 
+  const [count, setCount] = useState(0);
   useEffect(() => {
-    let board = placePiece(chessState, new King("black"), "e4");
-    // board = placePiece(chessState, new Bishop("black"), "a1");
-    board = placePiece(chessState, new Pawn("white"), "c4");
-    board = placePiece(chessState, new Pawn("white"), "d3");
-    // let tile = getTile("e4");
-    setChessState(board);
-  }, []);
+    console.log(count);
+    console.table(pieces, ["image", "color", "_position"]);
+    setCount((x) => x + 1);
+  }, [pieces]);
+
+  const [tileToEnPassant, setTileToEnPassant] = useState<string>();
 
   const [selectedPiece, setSelectedPiece] = useState<Piece | undefined>();
 
+  const letters = ["h", "g", "f", "e", "d", "c", "b", "a"];
   const handleTileClick = (tileId: string) => {
     let tile = getTile(tileId);
-    if (tile?.hableToMove && selectedPiece) {
+    if (tile?.ableToMove && selectedPiece) {
       let newBoard = cloneMatrix(chessState);
+      setTileToEnPassant("");
+      if (selectedPiece instanceof Pawn) {
+        enableEnPassant(tileId);
+      }
       if (tile.piece) removePiece(newBoard, tile.piece);
+      else if (tile.id === tileToEnPassant) {
+        executeEnPassant(tileId);
+      }
       movePiece(newBoard, selectedPiece, tile.id);
       setChessState(newBoard);
       setSelectedPiece(undefined);
     } else {
       let piece = tile?.piece;
       setSelectedPiece(piece);
+    }
+  };
+
+  const enableEnPassant = (tileId: string) => {
+    if (selectedPiece) {
+      let colorMultiplier = selectedPiece.color === "white" ? 1 : -1;
+      let newRowIndex = letters.findIndex((letter) => letter === tileId[0]) + 2 * colorMultiplier;
+      if (letters[newRowIndex] === selectedPiece.position[0]) {
+        setTileToEnPassant(
+          `${letters[newRowIndex - 1 * colorMultiplier]}${selectedPiece.position[1]}`
+        );
+        console.log(`${letters[newRowIndex - 1 * colorMultiplier]}${selectedPiece.position[1]}`);
+      }
+    }
+  };
+
+  const executeEnPassant = (tileId: string) => {
+    if (selectedPiece && tileToEnPassant) {
+      let colorMultiplier = selectedPiece.color === "white" ? 1 : -1;
+      let newRowIndex =
+        letters.findIndex((letter) => letter === tileToEnPassant[0]) + 1 * colorMultiplier;
+      let piece = getTile(`${letters[newRowIndex]}${tileId[1]}`)?.piece;
+      piece && removePiece(chessState, piece);
     }
   };
 
@@ -57,10 +90,15 @@ const ChessBoard = () => {
     board.forEach((row) => {
       row.forEach((tile) => {
         if (tilesToMove?.includes(tile.id)) {
-          tile.hableToMove = !tile.piece || tile.piece.color !== piece?.color;
+          tile.ableToMove = !tile.piece;
         } else if (piece && attackingTiles?.includes(tile.id) && tile.piece) {
-          tile.hableToMove = tile.piece.color !== piece.color;
-        } else tile.hableToMove = undefined;
+          tile.ableToMove = tile.piece.color !== piece.color;
+        } else if (piece instanceof Pawn) {
+          if (tile.id === tileToEnPassant) {
+            console.log(tileToEnPassant);
+          }
+          tile.ableToMove = tile.id === tileToEnPassant && attackingTiles?.includes(tile.id);
+        } else tile.ableToMove = undefined;
       });
     });
     setChessState(board);
@@ -72,10 +110,12 @@ const ChessBoard = () => {
         return row.map((tile: ITile) => (
           <div
             key={`tile-${tile.id}`}
-            className={`tile ${tile.hableToMove && "hableToMove"}`}
+            className={`tile ${tile.ableToMove && "hableToMove"}`}
             style={{
               backgroundColor:
-                tile.attackedBy && tile.attackedBy.length > 0 ? "#ff000040" : "transparent",
+                environment.debugger && tile.attackedBy && tile.attackedBy.length > 0
+                  ? "#ff000040"
+                  : "transparent",
             }}
             onClick={() => handleTileClick(tile.id)}
           >
